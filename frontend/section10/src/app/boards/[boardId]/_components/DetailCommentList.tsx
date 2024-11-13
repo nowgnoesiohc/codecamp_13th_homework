@@ -24,7 +24,7 @@ export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
   });
 
   // NOTE : 옮겨야할지도?
-  const dataLength = data?.fetchBoardComments.length ?? 10;
+
   // console.log(data);
 
   const handleEditId = (id: string) => {
@@ -33,6 +33,8 @@ export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
 
   const handleDeleteComment = () => {};
   const handleEditComment = () => {};
+
+  const dataLength = data?.fetchBoardComments.length ?? 10;
   const onNext = () => {
     fetchMore({
       variables: { page: Math.ceil(dataLength / fetchScale) + 1 },
