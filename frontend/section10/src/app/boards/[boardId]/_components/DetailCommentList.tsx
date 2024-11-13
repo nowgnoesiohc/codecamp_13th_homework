@@ -9,7 +9,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import DetailCommentListItem from "./DetailCommentListItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { warnOptionHasBeenMovedOutOfExperimental } from "next/dist/server/config";
 
 export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
@@ -23,8 +23,6 @@ export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
     variables: { page: 1, boardId: boardId },
   });
 
-  // NOTE : 옮겨야할지도?
-
   // console.log(data);
 
   const handleEditId = (id: string) => {
@@ -33,6 +31,10 @@ export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
 
   const handleDeleteComment = () => {};
   const handleEditComment = () => {};
+
+  useEffect(() => {
+    setHasMore(true);
+  }, [data]);
 
   const dataLength = data?.fetchBoardComments.length ?? 10;
   const onNext = () => {
@@ -45,13 +47,10 @@ export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
           setHasMore(false);
           return { fetchBoardComments: [...prev.fetchBoardComments] };
         }
-        console.log(
-          Math.ceil(dataLength / fetchScale) + 1,
-          fetchMoreResult.fetchBoardComments
-        );
+        console.log(Math.ceil(dataLength / fetchScale) + 1, fetchMoreResult);
         return {
           fetchBoardComments: [
-            ...prev.fetchBoardComments,
+            ...(prev.fetchBoardComments || []),
             ...fetchMoreResult.fetchBoardComments,
           ],
         };

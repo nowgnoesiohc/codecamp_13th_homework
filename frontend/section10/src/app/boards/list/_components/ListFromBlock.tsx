@@ -47,7 +47,7 @@ export default function ListFromBlock({ el, idx }: ListFormBlockProps) {
       className="flex border rounded h-12 px-6 py-4 gap-2 items-center hover:bg-gray-100 relative group duration-300"
       onClick={onClickDetail}
     >
-      <div className="w-16 flex justify-center prose-l_14_20">{idx}</div>
+      <div className="w-16 flex justify-center prose-l_14_20">{idx + 1}</div>
       <div className="w-full prose-sb_14_20">{el.title}</div>
 
       <div className="w-24 flex justify-center prose-me_14_20">{el.writer}</div>
