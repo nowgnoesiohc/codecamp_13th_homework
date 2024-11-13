@@ -1,55 +1,77 @@
 "use client";
-import Ratings from "@/components/ui/ratings";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   DELETE_COMMENT,
   FETCH_COMMENTS,
   UPDATE_COMMENT,
 } from "@/app/queries/comments-queries";
 import { useMutation, useQuery } from "@apollo/client";
-import { MdOutlineEdit, MdClear } from "react-icons/md";
+import InfiniteScroll from "react-infinite-scroll-component";
+
+import DetailCommentListItem from "./DetailCommentListItem";
+import { useState } from "react";
+import { warnOptionHasBeenMovedOutOfExperimental } from "next/dist/server/config";
 
 export default function DetailCommentList({ boardId }: IDeteailCommentProps) {
+  const [hasMore, setHasMore] = useState(true);
+  const [editId, setEditId] = useState("");
   const deleteComment = useMutation(DELETE_COMMENT);
   const updateComment = useMutation(UPDATE_COMMENT);
+  const fetchScale = 10;
 
-  const { data } = useQuery(FETCH_COMMENTS, {
+  const { data, fetchMore } = useQuery(FETCH_COMMENTS, {
     variables: { page: 1, boardId: boardId },
   });
-  const last_idx = data?.fetchBoardComments.length - 1;
-  console.log(data);
+
+  // NOTE : 옮겨야할지도?
+  const dataLength = data?.fetchBoardComments.length ?? 10;
+  // console.log(data);
+
+  const handleEditId = (id: string) => {
+    setEditId((prevId) => (prevId === id ? "" : id));
+  };
 
   const handleDeleteComment = () => {};
   const handleEditComment = () => {};
+  const onNext = () => {
+    fetchMore({
+      variables: { page: Math.ceil(dataLength / fetchScale) + 1 },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        console.log("료이키텐카이", fetchMoreResult);
+        if (fetchMoreResult.fetchBoardComments.length === 0) {
+          console.log("마지막 입니다");
+          setHasMore(false);
+          return { fetchBoardComments: [...prev.fetchBoardComments] };
+        }
+        console.log(
+          Math.ceil(dataLength / fetchScale) + 1,
+          fetchMoreResult.fetchBoardComments
+        );
+        return {
+          fetchBoardComments: [
+            ...prev.fetchBoardComments,
+            ...fetchMoreResult.fetchBoardComments,
+          ],
+        };
+      },
+    });
+  };
   return (
-    <>
-      {data?.fetchBoardComments.map((el: IComment, index: number) => (
-        <div key={el._id} className="flex flex-col gap-10">
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <Avatar className="w-5 h-5">
-                    <AvatarFallback>{el.writer}</AvatarFallback>
-                  </Avatar>
-                  <div className="prose-l_14_20 text-gray-700">{el.writer}</div>
-                </div>
-                <Ratings rating={el.rating} onRatingChange={() => {}} />
-              </div>
-              <div className="flex items-center group gap-2">
-                <MdOutlineEdit color="#333333" onClick={handleEditComment} />
-                <MdClear color="#333333" onClick={handleDeleteComment} />
-              </div>
-            </div>
-            <div className="prose-r_16_24">{el.contents}</div>
-            <div className="prose-r_14_20 text-[#818181]">
-              {el.createdAt.slice(0, 10).replace(/-/g, ".")}
-            </div>
-          </div>
-          {/* NOTE : 다시 보기 */}
-          {index !== last_idx && <hr />}
-        </div>
+    <InfiniteScroll
+      next={onNext}
+      hasMore={hasMore}
+      dataLength={dataLength}
+      loader={<div>로딩중입니다...</div>}
+      endMessage={<div>마지막입니다</div>}
+    >
+      {data?.fetchBoardComments.map((el: IComment, idx: number) => (
+        <DetailCommentListItem
+          key={el._id}
+          el={el}
+          editId={editId}
+          handleEditId={handleEditId}
+        />
       ))}
-    </>
+    </InfiniteScroll>
   );
 }

@@ -19,7 +19,7 @@ export default function DetailForm() {
     variables: { boardId: boardId },
   });
 
-  console.log(data);
+  // console.log(data);
 
   // API에서 받은 이미지 경로에 호스트 URL 추가
   const getImageUrl = (path: string) =>

@@ -10,9 +10,9 @@ interface ILayout {
 }
 export default function Layout(props: ILayout) {
   const pathname = usePathname();
-  console.log("===========");
-  console.log(pathname);
-  console.log("===========");
+  // console.log("===========");
+  // console.log(pathname);
+  // console.log("===========");
 
   const isHiddenHeader = HIDDEN_BANNER.some((path) =>
     pathname.startsWith(path)
